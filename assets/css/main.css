@@ -93,6 +93,7 @@ input, select, textarea {
 
 	body {
 		background: #f2f5f3;
+		overflow-x:hidden
 	}
 
 		body.is-preload *, body.is-preload *:before, body.is-preload *:after {
@@ -2675,7 +2676,6 @@ input, select, textarea {
 		border-radius: 8px;
 		color: #8b9790;
 		margin: 4em 0 0 0;
-		
 	}
 
 		#copyright a {
