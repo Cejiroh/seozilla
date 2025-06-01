@@ -159,7 +159,6 @@
 		position: relative;
 	}
 
-
 	.sizes {
 		font-size: 2rem;
 		font-weight: bold;
@@ -197,12 +196,15 @@
 	.black{
 		color: #333;
 	}
+	
 	.bord{
 		border: 1px solid #fff;
 	}
+	
 	.space{
 		padding-top: 3em;
 	}
+	
 	.services{
 		width: 100%;
 		display: flex;
@@ -249,6 +251,7 @@
 	.services_content h2{
 		margin-bottom:0em;
 	}
+	
 	.services_content p{
 		font-size: 1.5em;
 		margin-bottom:1.5em;
@@ -357,7 +360,6 @@
 		height: 100%;
 		display: none;
 	}
-
 
 	.video-container:hover {
 		transform: translateY(0);
@@ -496,8 +498,6 @@
 		color: white;
 	}
 
-
-
 	@media (max-width: 768px) {
 		.play-button {
 			width: 60px;
@@ -544,9 +544,6 @@
 			min-width: 100px !important;
 			padding:  0 2em 2em 2em;
 		}
-		.autoplay-vid-container{
-			background-color:red;
-		}
 		.autoplay-vid-wrapper mp4{
 		}
 		.autoplay-vid-wrapper{
@@ -563,6 +560,32 @@
 		}
         .sizes {
             font-size: 1rem;
+		}
+		
+		.device-indicator {
+			padding: 4px 8px;
+		}
+		
+		.heroimages{
+			position: absolute;
+			top: 50vh;
+			left: -125vh;
+			text-align: center;
+			transform: rotate(45deg);
+			width: 300vh;
+		}
+		
+		.heroimages img{
+			height: 200px;
+			border: 5px solid white;
+			border-radius: 5px;
+			background-color: #fff;
+			margin: 5px;
+			margin-left: 10px;
+			box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+			transform-origin: center;
+			opacity: 0;
+			animation: fadeInLeft 1s ease-in-out forwards;
 		}
 	}
 	
