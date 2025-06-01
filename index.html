@@ -1223,35 +1223,6 @@ gsap.to(".video", {
 	pin: false,
 	pinSpacing: false} });
 	
-	
-	
-//	let tl = gsap.timeline({
-//			scrollTrigger: {
-//			trigger: ".webdev",
-//			start: "center center",
-//			end: "300px center",
-//			snap: {
-//				snapTo:  (progress) => Math.round(progress),
-//				duration: 0.5, 
-//				ease: "power1.inOut"
-//			},
-//			scrub: true,
-//			pin: false,
-//			markers: true
-//			}
-//		});
-//		
-//	tl.to(".product", {
-//			duration: 3,
-//			y: "-35vh",
-//			opacity: 1,
-//		})
-//		.to(".video", {
-//			y: "-35vh",
-//			opacity: 1,
-//		});
-
-//
   const images = document.querySelectorAll('.product_animation img');
         const animationContainer = document.querySelector('.product_animation');
         let currentIndex = 0;
@@ -1348,13 +1319,13 @@ gsap.to(".sx", {
 	  } });
 	
 
+const deviceFrame = document.querySelector('.device-frame');
+const sizesText = document.querySelector('.sizes');
+const dimensionsText = document.querySelector('.dimensions');
+const deviceIndicator = document.querySelector('.device-indicator');
+const progressBar = document.querySelector('.progress-bar');
+const staticText = document.querySelector('.static-text');
 
-	const deviceFrame = document.querySelector('.device-frame');
-	const sizesText = document.querySelector('.sizes');
-	const dimensionsText = document.querySelector('.dimensions');
-	const deviceIndicator = document.querySelector('.device-indicator');
-	const progressBar = document.querySelector('.progress-bar');
-	const staticText = document.querySelector('.static-text');
 // Store original device dimensions
 const originalDevices = [
 	{ name: 'Desktop', width: 495, height: 300, color: 'linear-gradient(45deg, #f093fb 0%, #f5576c 100%)' },
@@ -1369,9 +1340,9 @@ const getResponsiveDevices = () => {
 	
 	let scaleFactor = 1;
 	if (isMobile) {
-		scaleFactor = 0.6; // 50% size on mobile
+		scaleFactor = 0.6; // 60% size on mobile
 	} else if (isTablet) {
-		scaleFactor = 0.8; // 75% size on tablet
+		scaleFactor = 0.8; // 80% size on tablet
 	}
 	
 	return originalDevices.map(device => ({
@@ -1383,201 +1354,233 @@ const getResponsiveDevices = () => {
 
 // Get current devices array
 let devices = getResponsiveDevices();
+let currentDevice = 0;
+let timeline;
+let isPlaying = false;
+
+function createTimeline() {
+	timeline = gsap.timeline({ 
+		repeat: -1, 
+		repeatDelay: 0,
+		onUpdate: updateProgress 
+	});
+	
+	// Start with a hold on Desktop, then cycle through Tablet and Mobile
+	timeline
+		// Hold Desktop for 2 seconds
+		.to({}, { duration: 0.7 })
+		
+		// Transition to Tablet
+		.to([sizesText, dimensionsText], {
+			duration: 0.3,
+			y: -30,
+			opacity: 0,
+			scale: 0.8,
+			stagger: 0.1,
+			ease: "back.in(1.7)"
+		})
+		.call(() => {
+			sizesText.textContent = devices[1].name;
+			deviceIndicator.textContent = "3:6";
+			currentDevice = 1;
+		})
+		.to(deviceFrame, {
+			duration: 1,
+			width: devices[1].width,
+			height: devices[1].height,
+			background: devices[1].color,
+			ease: "power2.inOut"
+		}, "-=0.0")
+		.fromTo([sizesText, dimensionsText], {
+			y: 30,
+			opacity: 0,
+			scale: 1.2
+		}, {
+			duration: 0.5,
+			y: 0,
+			opacity: 1,
+			scale: 1,
+			stagger: 0.1,
+			ease: "back.out(1.7)"
+		}, "-=0.8")
+		.to(deviceFrame, {
+			duration: 0.3,
+			scale: 1.02,
+			ease: "power2.inOut",
+			yoyo: true,
+			repeat: 1
+		}, "-=0.3")
+		
+		// Hold Tablet for 2 seconds
+		.to({}, { duration: 0.7 })
+		
+		// Transition to Mobile
+		.to([sizesText, dimensionsText], {
+			duration: 0.3,
+			y: -30,
+			opacity: 0,
+			scale: 0.8,
+			stagger: 0.1,
+			ease: "back.in(1.7)"
+		})
+		.call(() => {
+			sizesText.textContent = devices[2].name;
+			deviceIndicator.textContent = "9:16";
+			currentDevice = 2;
+		})
+		.to(deviceFrame, {
+			duration: 1,
+			width: devices[2].width,
+			height: devices[2].height,
+			background: devices[2].color,
+			ease: "power2.inOut"
+		}, "-=0.0")
+		.fromTo([sizesText, dimensionsText], {
+			y: 30,
+			opacity: 0,
+			scale: 1.2
+		}, {
+			duration: 0.5,
+			y: 0,
+			opacity: 1,
+			scale: 1,
+			stagger: 0.1,
+			ease: "back.out(1.7)"
+		}, "-=0.8")
+		.to(deviceFrame, {
+			duration: 0.3,
+			scale: 1.02,
+			ease: "power2.inOut",
+			yoyo: true,
+			repeat: 1
+		}, "-=0.3")
+		
+		// Hold Mobile for 2 seconds
+		.to({}, { duration: 0.7 })
+		
+		// Transition back to Desktop
+		.to([sizesText, dimensionsText], {
+			duration: 0.3,
+			y: -30,
+			opacity: 0,
+			scale: 0.8,
+			stagger: 0.1,
+			ease: "back.in(1.7)"
+		})
+		.call(() => {
+			sizesText.textContent = devices[0].name;
+			deviceIndicator.textContent = "16:10";
+			currentDevice = 0;
+		})
+		.to(deviceFrame, {
+			duration: 1,
+			width: devices[0].width,
+			height: devices[0].height,
+			background: devices[0].color,
+			ease: "power2.inOut"
+		}, "-=0.0")
+		.fromTo([sizesText, dimensionsText], {
+			y: 30,
+			opacity: 0,
+			scale: 1.2
+		}, {
+			duration: 0.5,
+			y: 0,
+			opacity: 1,
+			scale: 1,
+			stagger: 0.1,
+			ease: "back.out(1.7)"
+		}, "-=0.8")
+		.to(deviceFrame, {
+			duration: 0.3,
+			scale: 1.02,
+			ease: "power2.inOut",
+			yoyo: true,
+			repeat: 1
+		}, "-=0.3");
+	
+	return timeline;
+}
+
+function updateProgress() {
+	if (timeline) {
+		const progress = (timeline.progress() * 100) % 100;
+		gsap.set(progressBar, { scaleX: progress / 100 });
+	}
+}
+
+function startCycle() {
+	if (!timeline) {
+		timeline = createTimeline();
+	}
+	
+	if (!isPlaying) {
+		// Ensure we start with Desktop state properly set
+		gsap.set(deviceFrame, {
+			width: devices[0].width,
+			height: devices[0].height,
+			background: devices[0].color
+		});
+		
+		gsap.set([sizesText, dimensionsText], {
+			y: 0,
+			opacity: 1,
+			scale: 1
+		});
+		
+		sizesText.textContent = devices[0].name;
+		deviceIndicator.textContent = "16:10";
+		currentDevice = 0;
+		
+		timeline.play();
+		isPlaying = true;
+	}
+}
 
 // Update devices when window is resized
 const updateDevices = () => {
+	const wasPlaying = isPlaying;
+	const currentProgress = timeline ? timeline.progress() : 0;
+	
+	// Update devices array
 	devices = getResponsiveDevices();
-	// If you have a function that uses the devices array, call it here
-	// e.g., renderDevices();
-};
-
-window.addEventListener('resize', updateDevices);
-
-	let currentDevice = 0;
-	let timeline;
-	let isPlaying = false;
-	function createTimeline() {
-		timeline = gsap.timeline({ 
-			repeat: -1, 
-			repeatDelay: 0,
-			onUpdate: updateProgress 
+	
+	// If animation was playing, restart with new dimensions
+	if (wasPlaying && timeline) {
+		timeline.kill(); // Stop current timeline
+		timeline = null;
+		isPlaying = false;
+		
+		// Immediately update current device frame size
+		gsap.set(deviceFrame, {
+			width: devices[currentDevice].width,
+			height: devices[currentDevice].height,
+			background: devices[currentDevice].color
 		});
 		
-		// Start with a hold on Desktop, then cycle through Tablet and Mobile
-		timeline
-			// Hold Desktop for 2 seconds
-			.to({}, { duration: 0.7 })
-			
-			// Transition to Tablet
-			.to([sizesText, dimensionsText], {
-				duration: 0.3,
-				y: -30,
-				opacity: 0,
-				scale: 0.8,
-				stagger: 0.1,
-				ease: "back.in(1.7)"
-			})
-			.call(() => {
-				sizesText.textContent = devices[1].name;
-				deviceIndicator.textContent = "3:6";
-				currentDevice = 1;
-			})
-			.to(deviceFrame, {
-				duration: 1,
-				width: devices[1].width,
-				height: devices[1].height,
-				background: devices[1].color,
-				ease: "power2.inOut"
-			}, "-=0.0")
-			.fromTo([sizesText, dimensionsText], {
-				y: 30,
-				opacity: 0,
-				scale: 1.2
-			}, {
-				duration: 0.5,
-				y: 0,
-				opacity: 1,
-				scale: 1,
-				stagger: 0.1,
-				ease: "back.out(1.7)"
-			}, "-=0.8")
-			.to(deviceFrame, {
-				duration: 0.3,
-				scale: 1.02,
-				ease: "power2.inOut",
-				yoyo: true,
-				repeat: 1
-			}, "-=0.3")
-			
-			// Hold Tablet for 2 seconds
-			.to({}, { duration: 0.7 })
-			
-			// Transition to Mobile
-			.to([sizesText, dimensionsText], {
-				duration: 0.3,
-				y: -30,
-				opacity: 0,
-				scale: 0.8,
-				stagger: 0.1,
-				ease: "back.in(1.7)"
-			})
-			.call(() => {
-				sizesText.textContent = devices[2].name;
-				deviceIndicator.textContent = "9:16";
-				currentDevice = 2;
-			})
-			.to(deviceFrame, {
-				duration: 1,
-				width: devices[2].width,
-				height: devices[2].height,
-				background: devices[2].color,
-				ease: "power2.inOut"
-			}, "-=0.0")
-			.fromTo([sizesText, dimensionsText], {
-				y: 30,
-				opacity: 0,
-				scale: 1.2
-			}, {
-				duration: 0.5,
-				y: 0,
-				opacity: 1,
-				scale: 1,
-				stagger: 0.1,
-				ease: "back.out(1.7)"
-			}, "-=0.8")
-			.to(deviceFrame, {
-				duration: 0.3,
-				scale: 1.02,
-				ease: "power2.inOut",
-				yoyo: true,
-				repeat: 1
-			}, "-=0.3")
-			
-			// Hold Mobile for 2 seconds
-			.to({}, { duration: 0.7 })
-			
-			// Transition back to Desktop
-			.to([sizesText, dimensionsText], {
-				duration: 0.3,
-				y: -30,
-				opacity: 0,
-				scale: 0.8,
-				stagger: 0.1,
-				ease: "back.in(1.7)"
-			})
-			.call(() => {
-				sizesText.textContent = devices[0].name;
-				deviceIndicator.textContent = "16:10";
-				currentDevice = 0;
-			})
-			.to(deviceFrame, {
-				duration: 1,
-				width: devices[0].width,
-				height: devices[0].height,
-				background: devices[0].color,
-				ease: "power2.inOut"
-			}, "-=0.0")
-			.fromTo([sizesText, dimensionsText], {
-				y: 30,
-				opacity: 0,
-				scale: 1.2
-			}, {
-				duration: 0.5,
-				y: 0,
-				opacity: 1,
-				scale: 1,
-				stagger: 0.1,
-				ease: "back.out(1.7)"
-			}, "-=0.8")
-			.to(deviceFrame, {
-				duration: 0.3,
-				scale: 1.02,
-				ease: "power2.inOut",
-				yoyo: true,
-				repeat: 1
-			}, "-=0.3");
+		// Restart the animation
+		startCycle();
 		
-		return timeline;
-	}
-
-	function updateProgress() {
-		if (timeline) {
-			const progress = (timeline.progress() * 100) % 100;
-			gsap.set(progressBar, { scaleX: progress / 100 });
+		// Try to maintain roughly the same progress
+		if (timeline && currentProgress > 0) {
+			timeline.progress(currentProgress);
 		}
+	} else if (!wasPlaying) {
+		// If not playing, just update the current static frame
+		gsap.set(deviceFrame, {
+			width: devices[currentDevice].width,
+			height: devices[currentDevice].height,
+			background: devices[currentDevice].color
+		});
 	}
+};
 
-	function startCycle() {
-
-		if (!timeline) {
-			timeline = createTimeline();
-		}
-		
-		if (!isPlaying) {
-			// Ensure we start with Desktop state properly set
-			gsap.set(deviceFrame, {
-				width: devices[0].width,
-				height: devices[0].height,
-				background: devices[0].color
-			});
-			
-			gsap.set([sizesText, dimensionsText], {
-				y: 0,
-				opacity: 1,
-				scale: 1
-			});
-			
-			sizesText.textContent = devices[0].name;
-				deviceIndicator.textContent = "16:10";
-			currentDevice = 0;
-			
-			timeline.play();
-			isPlaying = true;
-			
-		}
-	}
-
-
+// Debounce resize events to avoid excessive updates
+let resizeTimeout;
+window.addEventListener('resize', () => {
+	clearTimeout(resizeTimeout);
+	resizeTimeout = setTimeout(updateDevices, 150);
+});
 	// Initialize progress bar
 	gsap.set(progressBar, { scaleX: 0 });
 
@@ -1702,7 +1705,6 @@ window.addEventListener('resize', updateDevices);
                 closePopup();
             }
         });
-		
 		
         let selectedServices = [];
 
@@ -1830,8 +1832,6 @@ const createImages = () => {
     
     container.appendChild(img);
   });
-  
-  // Set initial sizes
   updateImageSizes();
 };
 
