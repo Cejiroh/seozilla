@@ -1988,6 +1988,7 @@ window.addEventListener('resize', updateImageSizes);
           }
         });
         
+        Matter.Engine.update(engine);
         requestAnimationFrame(rerender);
       })();
     };
