@@ -1793,6 +1793,7 @@ let physicsStarted = false;
 let isMobile = false;
 let touchStartY = 0;
 let isScrolling = false;
+let resizeTimeout = null;
 
 // Store original dimensions globally
 const imageData = [
@@ -1828,6 +1829,8 @@ const createImages = () => {
     if (isMobile) {
       img.style.touchAction = 'none';
       img.style.pointerEvents = 'auto';
+      img.style.userSelect = 'none';
+      img.style.webkitUserSelect = 'none';
     }
     
     container.appendChild(img);
@@ -1848,7 +1851,27 @@ function updateImageSizes() {
   });
 }
 
-window.addEventListener('resize', updateImageSizes);
+// Debounced resize handler to prevent excessive reloads
+const handleResize = () => {
+  if (resizeTimeout) {
+    clearTimeout(resizeTimeout);
+  }
+  
+  resizeTimeout = setTimeout(() => {
+    const wasMobile = isMobile;
+    const nowMobile = detectMobile();
+    
+    // Only reload if device type changed (mobile to desktop or vice versa)
+    if (physicsStarted && wasMobile !== nowMobile) {
+      location.reload();
+    } else if (physicsStarted) {
+      // Just update image sizes for same device type
+      updateImageSizes();
+    }
+  }, 250); // Debounce resize events
+};
+
+window.addEventListener('resize', handleResize);
 
 const renderCanvas = () => {
   const Engine = Matter.Engine;
@@ -2055,13 +2078,14 @@ const addImageInteractions = () => {
       });
     });
   } else {
-    // Mobile touch interactions
+    // Mobile touch interactions - FIXED VERSION
     let touchStartTime = 0;
     let touchStartPos = { x: 0, y: 0 };
     let isTouchDragging = false;
     
-    // Handle background scrolling on mobile
+    // Prevent default touch behaviors on the container
     letsworkElement.addEventListener('touchstart', (e) => {
+      // Only handle background touches, not image touches
       if (e.target === letsworkElement || e.target.tagName === 'CANVAS') {
         touchStartY = e.touches[0].clientY;
         isScrolling = false;
@@ -2069,46 +2093,54 @@ const addImageInteractions = () => {
     }, { passive: true });
     
     letsworkElement.addEventListener('touchmove', (e) => {
+      // Only handle background touches for scrolling
       if (e.target === letsworkElement || e.target.tagName === 'CANVAS') {
         const touchCurrentY = e.touches[0].clientY;
         const deltaY = touchStartY - touchCurrentY;
         
         // Scroll the page when dragging on background
-        window.scrollBy(0, deltaY);
-        touchStartY = touchCurrentY;
-        isScrolling = true;
+        if (Math.abs(deltaY) > 5) { // Only scroll if significant movement
+          window.scrollBy(0, deltaY);
+          touchStartY = touchCurrentY;
+          isScrolling = true;
+        }
       }
     }, { passive: true });
     
-    // Handle image touches
+    // Handle image touches with better event management
     images.forEach(img => {
+      let touchMoved = false;
+      
       img.addEventListener('touchstart', (e) => {
         touchStartTime = Date.now();
         touchStartPos = { 
           x: e.touches[0].clientX, 
           y: e.touches[0].clientY 
         };
-        isTouchDragging = false;
+        touchMoved = false;
         
         // Add visual feedback
         img.style.filter = 'brightness(1.2) saturate(1.3)';
         img.style.transform += ' scale(1.05)';
         
-        e.preventDefault(); // Prevent default touch behavior
-      }, { passive: false });
+        // Prevent scrolling when touching images
+        e.stopPropagation();
+      }, { passive: true });
       
       img.addEventListener('touchmove', (e) => {
         if (touchStartTime > 0) {
+          const currentTouch = e.touches[0];
           const distance = Math.sqrt(
-            Math.pow(e.touches[0].clientX - touchStartPos.x, 2) + 
-            Math.pow(e.touches[0].clientY - touchStartPos.y, 2)
+            Math.pow(currentTouch.clientX - touchStartPos.x, 2) + 
+            Math.pow(currentTouch.clientY - touchStartPos.y, 2)
           );
-          if (distance > 10) { // Slightly higher threshold for touch
-            isTouchDragging = true;
+          if (distance > 15) { // Higher threshold to prevent accidental drags
+            touchMoved = true;
           }
         }
-        e.preventDefault();
-      }, { passive: false });
+        // Prevent page scrolling when touching images
+        e.stopPropagation();
+      }, { passive: true });
       
       img.addEventListener('touchend', (e) => {
         const touchDuration = Date.now() - touchStartTime;
@@ -2117,22 +2149,30 @@ const addImageInteractions = () => {
         img.style.filter = 'brightness(1) saturate(1)';
         img.style.transform = img.style.transform.replace(' scale(1.05)', '');
         
-        // If it's a quick tap without dragging, treat as click
-        if (!isTouchDragging && touchDuration < 300) {
-          openPopup();
+        // If it's a quick tap without significant movement, treat as click
+        if (!touchMoved && touchDuration < 400 && touchDuration > 50) {
+          // Add a small delay to ensure the touch event is fully processed
+          setTimeout(() => {
+            if (typeof openPopup === 'function') {
+              openPopup();
+            }
+          }, 10);
         }
         
         // Reset touch tracking
-        isTouchDragging = false;
+        touchMoved = false;
         touchStartTime = 0;
         
+        // Prevent any default behaviors and stop propagation
+        e.stopPropagation();
         e.preventDefault();
       }, { passive: false });
       
       // Prevent context menu on long press
       img.addEventListener('contextmenu', (e) => {
         e.preventDefault();
-      });
+        e.stopPropagation();
+      }, { passive: false });
     });
   }
 };
@@ -2158,17 +2198,23 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, observerOptions);
 
+// Enhanced DOMContentLoaded with mobile-specific setup
 window.addEventListener("DOMContentLoaded", () => {
   const letsworkElement = document.getElementById('letswork');
   if (letsworkElement) {
+    // Add mobile-specific styles
+    if (detectMobile()) {
+      letsworkElement.style.touchAction = 'pan-y'; // Allow vertical scrolling
+      letsworkElement.style.overflowX = 'hidden'; // Prevent horizontal scroll
+      
+      // Prevent zoom on double-tap
+      const viewport = document.querySelector('meta[name=viewport]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+      }
+    }
+    
     observer.observe(letsworkElement);
-  }
-});
-
-// Handle window resize
-window.addEventListener('resize', () => {
-  if (physicsStarted) {
-    location.reload();
   }
 });
   </script>
