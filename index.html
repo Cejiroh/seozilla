@@ -579,8 +579,8 @@
 			border: 5px solid white;
 			border-radius: 5px;
 			background-color: #fff;
-			margin: 5px;
-			margin-left: 10px;
+			margin: 3px;
+			margin-left: 6px;
 			box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 			transform-origin: center;
 			opacity: 0;
@@ -744,6 +744,28 @@
 	.error-message {
 		color: #f69679;
 	}
+	.contact_us{
+		z-index: 99999999;
+		position: sticky;
+		bottom: 0;
+		width: 100%;
+		text-align: center;
+		
+	}
+	.logom{
+		display: block;
+		color: inherit;
+		text-decoration: none;
+		height: 40px;
+		line-height: 44px;
+		padding: 0 1em 0 1em;
+		color: #888;
+		color: rgba(255, 255, 255, 0.5);
+		border-top: solid 2px rgba(87, 93, 89, 0.15);
+		font-size: 0.8em;
+	}
+
+
 
     </style>
 	<body class="homepage is-preload">
@@ -758,14 +780,9 @@
 				</header>
 				<nav id="nav">
 					<ul>
-						<li class="logom"><a href="index.html"><img src="images/Main Logo Colored.png " /></a></li>
-						<li class=""><a href="index.html"> </a></li>
-						<li><a href="index.html"> </a></li>
-						<li>
-							<a href="#"> </a>
-						</li>
-						<li><a href="left-sidebar.html"> </a></li>
-						<li class="contactus"><a href="javascript:void(0)" onclick="openPopup()">Contact Us</a></li>
+						<li class="logom active"><a href="index.html"><img src="images/Main Logo Colored.png " /></a></li>
+						<li class="contactus">
+							<a class="xlink" href="javascript:void(0)" onclick="openPopup()">Contact Us</a></li>
 					</ul>
 				</nav>
 
@@ -2123,7 +2140,7 @@ window.addEventListener('resize', updateImageSizes);
 <script src='https://assets.codepen.io/16327/ScrollTrigger.min.js?r=v3.12.0'></script>
 			
 			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/jquery.dropotron.min.js"></script>
+			<!-- <script src="assets/js/jquery.dropotron.min.js"></script> -->
 			<script src="assets/js/jquery.scrolly.min.js"></script>
 			<script src="assets/js/browser.min.js"></script>
 			<script src="assets/js/breakpoints.min.js"></script>
