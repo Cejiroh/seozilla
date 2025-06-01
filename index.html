@@ -255,7 +255,7 @@
 		margin-bottom:1.5em;
 	}
 	.animation_container{
-		min-width: 600px;
+		//min-width: 600px;
 		display: flex;
 		align-items: center;
 		display: flex;
@@ -363,9 +363,7 @@
 	.video-container:hover {
 		transform: translateY(0);
 	}
-
-
-
+	
 	.loading-spinner {
 		position: absolute;
 		top: 50%;
@@ -392,20 +390,6 @@
 	@keyframes fadeIn {
 		from { opacity: 0; }
 		to { opacity: 1; }
-	}
-
-	@media (max-width: 768px) {
-		.play-button {
-			width: 60px;
-			height: 60px;
-		}
-		
-		.play-icon {
-			border-left-width: 15px;
-			border-top-width: 9px;
-			border-bottom-width: 9px;
-		}
-		
 	}
 	
 	 .popup-overlay {
@@ -514,7 +498,19 @@
 	}
 
 
+
 	@media (max-width: 768px) {
+		.play-button {
+			width: 60px;
+			height: 60px;
+		}
+		
+		.play-icon {
+			border-left-width: 15px;
+			border-top-width: 9px;
+			border-bottom-width: 9px;
+		}
+		
 		.popup-container {
 			padding: 30px 25px;
 		}
@@ -539,17 +535,34 @@
 		.services{
 			flex-direction: column;
 		}
+		.services_content {
+			padding-bottom: 0;
+		}
+		.services_content h2{
+			font-size: 2em;
+		}
 		.animation_container{
-			padding-bottom: 2em;
+			padding:  0 2em 2em 2em;
 		}
 		.autoplay-vid-container{
 			background-color:red;
 		}
+		.autoplay-vid-wrapper mp4{
+		}
 		.autoplay-vid-wrapper{
-			max-height: 300px;
+			max-height: 200px;
 		}
 		.hero{
-			height: 450px;
+			height: 350px;
+			padding:  0 2em 2em 2em;		
+		}
+		.product_animation {
+			position: relative;
+			width: 100%;
+			height: 200px;
+		}
+        .sizes {
+            font-size: 1rem;
 		}
 	}
 	
@@ -583,131 +596,127 @@
 		transition: transform 0.1s ease;
 		height: 50px;
 	}
-	</style>
-	
-	<style>
+	.autoplay-vid-container {
+		position: relative;
+		width: 100%;
+		max-width: 1100px;
+		margin: 50px auto;
+		border-radius: 15px;
+		overflow: hidden;
+		box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+		background: rgba(255,255,255,0.1);
+		backdrop-filter: blur(10px);
+	}
 
-        .autoplay-vid-container {
-            position: relative;
-            width: 100%;
-            max-width: 1100px;
-            margin: 50px auto;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-        }
+	.autoplay-vid-wrapper {
+		position: relative;
+		width: 100%;
+		height: 650px;
+	}
 
-        .autoplay-vid-wrapper {
-            position: relative;
-            width: 100%;
-            height: 650px;
-        }
+	.autoplay-vid-player {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: opacity 0.5s ease;
+	}
 
-        .autoplay-vid-player {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: opacity 0.5s ease;
-        }
+	.autoplay-vid-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0,0,0,0.7);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: white;
+		font-size: 1.2rem;
+		transition: opacity 0.5s ease;
+	}
 
-        .autoplay-vid-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-            transition: opacity 0.5s ease;
-        }
+	.autoplay-vid-overlay.autoplay-vid-hidden {
+		opacity: 0;
+		pointer-events: none;
+	}
 
-        .autoplay-vid-overlay.autoplay-vid-hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
+	.autoplay-vid-controls {
+		position: absolute;
+		top: 15px;
+		right: 15px;
+		display: flex;
+		gap: 10px;
+		z-index: 10;
+	}
 
-        .autoplay-vid-controls {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-        }
+	.autoplay-vid-sound-btn {
+		background: rgba(0,0,0,0.7);
+		border: 2px solid rgba(255,255,255,0.3);
+		color: white;
+		width: 45px;
+		height: 45px;
+		border-radius: 50%;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 18px;
+		transition: all 0.3s ease;
+		backdrop-filter: blur(5px);
+	}
 
-        .autoplay-vid-sound-btn {
-            background: rgba(0,0,0,0.7);
-            border: 2px solid rgba(255,255,255,0.3);
-            color: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-        }
+	.autoplay-vid-sound-btn:hover {
+		background: rgba(255,255,255,0.2);
+		border-color: rgba(255,255,255,0.6);
+		transform: scale(1.1);
+	}
 
-        .autoplay-vid-sound-btn:hover {
-            background: rgba(255,255,255,0.2);
-            border-color: rgba(255,255,255,0.6);
-            transform: scale(1.1);
-        }
+	.autoplay-vid-sound-btn.autoplay-vid-muted {
+		background: rgba(220,53,69,0.8);
+		border-color: rgba(220,53,69,0.6);
+	}
 
-        .autoplay-vid-sound-btn.autoplay-vid-muted {
-            background: rgba(220,53,69,0.8);
-            border-color: rgba(220,53,69,0.6);
-        }
+	.autoplay-vid-play-indicator {
+		background: rgba(255,255,255,0.2);
+		border: 2px solid white;
+		border-radius: 50%;
+		width: 80px;
+		height: 80px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 20px;
+		animation: autoplay-vid-pulse 2s infinite;
+	}
 
-        .autoplay-vid-play-indicator {
-            background: rgba(255,255,255,0.2);
-            border: 2px solid white;
-            border-radius: 50%;
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            animation: autoplay-vid-pulse 2s infinite;
-        }
+	.autoplay-vid-play-arrow {
+		width: 0;
+		height: 0;
+		border-left: 20px solid white;
+		border-top: 12px solid transparent;
+		border-bottom: 12px solid transparent;
+		margin-left: 4px;
+	}
 
-        .autoplay-vid-play-arrow {
-            width: 0;
-            height: 0;
-            border-left: 20px solid white;
-            border-top: 12px solid transparent;
-            border-bottom: 12px solid transparent;
-            margin-left: 4px;
-        }
+	@keyframes autoplay-vid-pulse {
+		0%, 100% { transform: scale(1); opacity: 0.8; }
+		50% { transform: scale(1.1); opacity: 1; }
+	}
+	.hero a{
+		text-decoration: none;
+	}
+	.xhide{
+		display: Disable;
+	}
 
-        @keyframes autoplay-vid-pulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; }
-        }
-		.hero a{
-			text-decoration: none;
-		}
-		.xhide{
-			display: Disable;
-		}
+	.success-message {
+		color: #155724;
+	}
 
-        .success-message {
-            color: #155724;
-        }
-
-        .error-message {
-            color: #f69679;
-        }
+	.error-message {
+		color: #f69679;
+	}
 
     </style>
 	<body class="homepage is-preload">
@@ -1301,12 +1310,43 @@ gsap.to(".sx", {
 	const deviceIndicator = document.querySelector('.device-indicator');
 	const progressBar = document.querySelector('.progress-bar');
 	const staticText = document.querySelector('.static-text');
+// Store original device dimensions
+const originalDevices = [
+	{ name: 'Desktop', width: 495, height: 300, color: 'linear-gradient(45deg, #f093fb 0%, #f5576c 100%)' },
+	{ name: 'Tablet', width: 225, height: 300, color: 'linear-gradient(45deg, #7ec274 0%, #a3d39c 100%)' },
+	{ name: 'Mobile', width: 168, height: 300, color: 'linear-gradient(45deg, #f78d6c 0%, #f69679 100%)' }
+];
 
-	const devices = [
-		{ name: 'Desktop', width: 495, height: 300, color: 'linear-gradient(45deg, #f093fb 0%, #f5576c 100%)' },
-		{ name: 'Tablet', width: 225, height: 300, color: 'linear-gradient(45deg, #7ec274 0%, #a3d39c 100%)' },
-		{ name: 'Mobile', width: 168, height: 300, color: 'linear-gradient(45deg, #f78d6c 0%, #f69679 100%)' }
-	];
+// Create responsive devices array based on screen size
+const getResponsiveDevices = () => {
+	const isMobile = window.innerWidth < 768;
+	const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+	
+	let scaleFactor = 1;
+	if (isMobile) {
+		scaleFactor = 0.6; // 50% size on mobile
+	} else if (isTablet) {
+		scaleFactor = 0.8; // 75% size on tablet
+	}
+	
+	return originalDevices.map(device => ({
+		...device,
+		width: Math.round(device.width * scaleFactor),
+		height: Math.round(device.height * scaleFactor)
+	}));
+};
+
+// Get current devices array
+let devices = getResponsiveDevices();
+
+// Update devices when window is resized
+const updateDevices = () => {
+	devices = getResponsiveDevices();
+	// If you have a function that uses the devices array, call it here
+	// e.g., renderDevices();
+};
+
+window.addEventListener('resize', updateDevices);
 
 	let currentDevice = 0;
 	let timeline;
@@ -1704,30 +1744,53 @@ gsap.to(".sx", {
   <script>
     let physicsStarted = false;
     
-    const createImages = () => {
-      // Array of image URLs (using placeholder images)
-      const imageData = [
-        { url: 'images/letswork/1.png', width: 405, height: 111 },
-        { url: 'images/letswork/2.png', width: 600, height: 111 },
-        { url: 'images/letswork/3.png', width: 458, height: 111 },
-        { url: 'images/letswork/4.png', width: 458, height: 111  },
-        { url: 'images/letswork/5.png', width: 300, height: 300 },
-        { url: 'images/letswork/6.png', width: 150, height: 150 },
-      ];
+ // Store original dimensions globally
+const imageData = [
+  { url: 'images/letswork/1.png', width: 405, height: 111 },
+  { url: 'images/letswork/2.png', width: 600, height: 111 },
+  { url: 'images/letswork/3.png', width: 458, height: 111 },
+  { url: 'images/letswork/4.png', width: 458, height: 111 },
+  { url: 'images/letswork/5.png', width: 300, height: 300 },
+  { url: 'images/letswork/6.png', width: 150, height: 150 },
+];
 
-      const container = document.getElementById('letswork');
-      
-      imageData.forEach((imgData, index) => {
-        const img = document.createElement('img');
-        img.className = `image-item ${imgData.highlighted ? 'highlighted' : ''}`;
-        img.src = imgData.url;
-        img.style.width = `${imgData.width}px`;
-        img.style.height = `${imgData.height}px`;
-        img.alt = `Falling image ${index + 1}`;
-        img.draggable = false;
-        container.appendChild(img);
-      });
-    };
+const createImages = () => {
+  const container = document.getElementById('letswork');
+  
+  // Clear existing images to prevent duplicates
+  container.innerHTML = '';
+  
+  imageData.forEach((imgData, index) => {
+    const img = document.createElement('img');
+    img.className = `image-item ${imgData.highlighted ? 'highlighted' : ''}`;
+    img.src = imgData.url;
+    img.alt = `Falling image ${index + 1}`;
+    img.draggable = false;
+    img.dataset.index = index; // Store index for later reference
+    container.appendChild(img);
+  });
+  
+  // Set initial sizes
+  updateImageSizes();
+};
+
+function updateImageSizes() {
+  const images = document.querySelectorAll('#letswork .image-item');
+  const isMobile = window.innerWidth < 768;
+  const scaleFactor = isMobile ? 0.5 : 1;
+  
+  images.forEach(img => {
+    const index = parseInt(img.dataset.index);
+    const originalData = imageData[index];
+    
+    img.style.width = `${originalData.width * scaleFactor}px`;
+    img.style.height = `${originalData.height * scaleFactor}px`;
+  });
+}
+
+// Initialize when DOM is ready (remove this line if you're calling createImages() elsewhere)
+// document.addEventListener('DOMContentLoaded', createImages);
+window.addEventListener('resize', updateImageSizes);
 
     const renderCanvas = () => {
       const Engine = Matter.Engine;
