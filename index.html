@@ -79,14 +79,6 @@
 		font-stretch: calc(var(--fs) * 1%);
 		letter-spacing: -0.5vw;
 	}
-	.hero img{
-		position: absolute;
-		margin: 0px;
-		height: 20vh;
-		border-radius: 10px;
-		z-index: 1;
-		opacity: 0;
-	}
 	.img1{
 		left: 50px;
 		top:-300px;
@@ -218,6 +210,7 @@
 		justify-content: center;
 		padding: 10px;
 		border-radius: 20px;
+		flex-direction: row;
 	}
 	.webdev{	
 		background-color: #cbe8bc;
@@ -294,273 +287,271 @@
 		border-radius: 10px;
 	}
 	
-        .video-container {
-            max-width: 495px;
-            margin: 0 auto;
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            background: #000;
-			border: 5px solid white;
-        }
+	.video-container {
+		max-width: 495px;
+		margin: 0 auto;
+		position: relative;
+		border-radius: 20px;
+		overflow: hidden;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+		background: #000;
+		border: 5px solid white;
+	}
 
-        .video-thumbnail {
-            position: relative;
-            cursor: pointer;
-            aspect-ratio: 16/9;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
+	.video-thumbnail {
+		position: relative;
+		cursor: pointer;
+		aspect-ratio: 16/9;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.3s ease;
+	}
 
-        .video-thumbnail:hover {
-            transform: scale(1.02);
-        }
+	.video-thumbnail:hover {
+		transform: scale(1.02);
+	}
 
-        .thumbnail-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: opacity 0.3s ease;
-        }
+	.thumbnail-image {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: opacity 0.3s ease;
+	}
 
-        .play-button {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-        }
+	.play-button {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 80px;
+		height: 80px;
+		background: rgba(255, 255, 255, 0.95);
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+		backdrop-filter: blur(10px);
+	}
 
-        .play-button:hover {
-            transform: translate(-50%, -50%) scale(1.1);
-            background: rgba(255, 255, 255, 1);
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
-        }
+	.play-button:hover {
+		transform: translate(-50%, -50%) scale(1.1);
+		background: rgba(255, 255, 255, 1);
+		box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+	}
 
-        .play-icon {
-            width: 0;
-            height: 0;
-            border-left: 20px solid #333;
-            border-top: 12px solid transparent;
-            border-bottom: 12px solid transparent;
-            margin-left: 4px;
-        }
+	.play-icon {
+		width: 0;
+		height: 0;
+		border-left: 20px solid #333;
+		border-top: 12px solid transparent;
+		border-bottom: 12px solid transparent;
+		margin-left: 4px;
+	}
 
-        .video-element {
-            width: 100%;
-            height: 100%;
-            display: none;
-        }
-
-
-        .video-container:hover {
-            transform: translateY(0);
-        }
+	.video-element {
+		width: 100%;
+		height: 100%;
+		display: none;
+	}
 
 
-
-        .loading-spinner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            display: none;
-        }
-
-        @keyframes spin {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-		
-		 .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
-
-        .popup-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .popup-container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 800px;
-            width: 90%;
-            max-height: 95vh;
-            overflow-y: auto;
-            position: relative;
-            transform: translateY(-100px);
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-
-        .popup-overlay.active .popup-container {
-            transform: translateY(0);
-        }
-
-        .close-btn {
-			text-decoration: none;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #f3f4f6;
-            border: none;
-            width: 50px !important;
-            height: 50px !important;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: #6b7280;
-            transition: all 0.2s ease;
-        }
-
-        .close-btn:hover {
-            background: #e5e7eb;
-            color: #374151;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-
-        .form-group {
-            flex: 1;
-        }
-
-        .form-group.full-width {
-            width: 100%;
-        }
+	.video-container:hover {
+		transform: translateY(0);
+	}
 
 
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
 
-        .checkbox-item {
-            background: #f3f4f6;
-            border: 2px solid #e5e7eb;
-            border-radius: 25px;
-            padding: 8px 16px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
+	.loading-spinner {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 40px;
+		height: 40px;
+		border: 3px solid rgba(255, 255, 255, 0.3);
+		border-top: 3px solid white;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		display: none;
+	}
 
-        .checkbox-item:hover {
-            border-color: #9ca3af;
-        }
+	@keyframes spin {
+		0% { transform: translate(-50%, -50%) rotate(0deg); }
+		100% { transform: translate(-50%, -50%) rotate(360deg); }
+	}
 
-        .checkbox-item.selected {
-            background: #f69679;
-            color: white;
-        }
+	.fade-in {
+		animation: fadeIn 0.5s ease-in;
+	}
 
+	@keyframes fadeIn {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
 
-        @media (max-width: 768px) {
-		
-		.heroimages{
-			position: absolute;
-			text-align: center;
+	@media (max-width: 768px) {
+		.play-button {
+			width: 60px;
+			height: 60px;
 		}
 		
-		.heroimages img{
-			height: 150px;
-			border: 5px solid white;
-			border-radius: 5px;
-			background-color: #fff;
-			margin: 5px;
-			margin-left: 10px;
-			box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-			transform-origin: center;
-			opacity: 0;
-			animation: fadeInLeft 1s ease-in-out forwards;
+		.play-icon {
+			border-left-width: 15px;
+			border-top-width: 9px;
+			border-bottom-width: 9px;
 		}
 		
-            .play-button {
-                width: 60px;
-                height: 60px;
-            }
-            
-            .play-icon {
-                border-left-width: 15px;
-                border-top-width: 9px;
-                border-bottom-width: 9px;
-            }
-            
-            .popup-container {
-                padding: 30px 25px;
-            }
+	}
+	
+	 .popup-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		opacity: 0;
+		visibility: hidden;
+		transition: all 0.3s ease;
+		z-index: 1000;
+	}
 
-            h1 {
-                font-size: 36px;
-            }
+	.popup-overlay.active {
+		opacity: 1;
+		visibility: visible;
+	}
 
-            .form-row {
-                flex-direction: column;
-                gap: 25px;
-            }
+	.popup-container {
+		background: white;
+		border-radius: 20px;
+		padding: 40px;
+		max-width: 800px;
+		width: 90%;
+		max-height: 95vh;
+		overflow-y: auto;
+		position: relative;
+		transform: translateY(-100px);
+		transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+		box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+	}
 
-            .checkbox-group {
-                gap: 8px;
-            }
+	.popup-overlay.active .popup-container {
+		transform: translateY(0);
+	}
 
-            .checkbox-item {
-                font-size: 13px;
-                padding: 6px 12px;
-            }
-        }
-		
+	.close-btn {
+		text-decoration: none;
+		position: absolute;
+		top: 20px;
+		right: 20px;
+		background: #f3f4f6;
+		border: none;
+		width: 50px !important;
+		height: 50px !important;
+		border-radius: 50%;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 20px;
+		color: #6b7280;
+		transition: all 0.2s ease;
+	}
+
+	.close-btn:hover {
+		background: #e5e7eb;
+		color: #374151;
+	}
+
+	.form-row {
+		display: flex;
+		gap: 20px;
+		margin-bottom: 15px;
+	}
+
+	.form-group {
+		flex: 1;
+	}
+
+	.form-group.full-width {
+		width: 100%;
+	}
+
+
+	.checkbox-group {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		margin-bottom: 20px;
+	}
+
+	.checkbox-item {
+		background: #f3f4f6;
+		border: 2px solid #e5e7eb;
+		border-radius: 25px;
+		padding: 8px 16px;
+		font-size: 14px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		user-select: none;
+	}
+
+	.checkbox-item:hover {
+		border-color: #9ca3af;
+	}
+
+	.checkbox-item.selected {
+		background: #f69679;
+		color: white;
+	}
+
+
+	@media (max-width: 768px) {
+		.popup-container {
+			padding: 30px 25px;
+		}
+
+		h1 {
+			font-size: 36px;
+		}
+
+		.form-row {
+			flex-direction: column;
+			gap: 25px;
+		}
+
+		.checkbox-group {
+			gap: 8px;
+		}
+
+		.checkbox-item {
+			font-size: 13px;
+			padding: 6px 12px;
+		}
+		.services{
+			flex-direction: column;
+		}
+		.animation_container{
+			padding-bottom: 2em;
+		}
+		.autoplay-vid-container{
+			background-color:red;
+		}
+		.autoplay-vid-wrapper{
+			max-height: 300px;
+		}
+		.hero{
+			height: 450px;
+		}
+	}
 	
 	.letswork{
 		background-color: #f2f5f3;
@@ -612,7 +603,6 @@
             position: relative;
             width: 100%;
             height: 650px;
-            background: #000;
         }
 
         .autoplay-vid-player {
@@ -734,10 +724,11 @@
 					<ul>
 						<li class="logom"><a href="index.html"><img src="images/Main Logo Colored.png " /></a></li>
 						<li class=""><a href="index.html"> </a></li>
+						<li><a href="index.html"> </a></li>
 						<li>
-							<a href="#services_container"> </a>
+							<a href="#"> </a>
 						</li>
-						<li><a href="#main"> </a></li>
+						<li><a href="left-sidebar.html"> </a></li>
 						<li class="contactus"><a href="#" onclick="openPopup()">Contact Us</a></li>
 					</ul>
 				</nav>
@@ -770,19 +761,19 @@
 								<section class="hero">
 												
 
-    <div class="autoplay-vid-container" id="autoplayVidContainer">
-        <div class="autoplay-vid-wrapper">
-            <video id="autoplayVidPlayer" loop preload="metadata" class="autoplay-vid-player">
-                <source src="videos/preview.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-            <div class="autoplay-vid-controls">
-                <a class="autoplay-vid-sound-btn autoplay-vid-muted" id="autoplayVidSoundBtn" title="Toggle Sound">
-                    🔇
-                </a>
-            </div>
-        </div>
-    </div>
+								<div class="autoplay-vid-container" id="autoplayVidContainer">
+									<div class="autoplay-vid-wrapper">
+										<video id="autoplayVidPlayer" loop preload="metadata" class="autoplay-vid-player">
+											<source src="videos/preview.mp4" type="video/mp4">
+											Your browser does not support the video tag.
+										</video>
+										<div class="autoplay-vid-controls">
+											<a class="autoplay-vid-sound-btn autoplay-vid-muted" id="autoplayVidSoundBtn" title="Toggle Sound">
+												🔇
+											</a>
+										</div>
+									</div>
+								</div>
  <script>
         const autoplayVid = document.getElementById('autoplayVidPlayer');
         const autoplayVidContainer = document.getElementById('autoplayVidContainer');
@@ -934,7 +925,7 @@
 							</div>
 						</div> -->
 					</div>
-					<div id="services_container" class="container services_container">
+					<div class="container services_container">
 					<div class="row gtr-200">
 						<div class="col-12">
 							<section class="services video">
@@ -1042,8 +1033,6 @@
 
                     this.videoElement.addEventListener('canplay', handleCanPlay);
                     this.videoElement.addEventListener('error', handleError);
-                    
-                    // Start loading the video
                     this.videoElement.load();
                 });
             }
@@ -1062,7 +1051,6 @@
             }
         }
 
-        // Initialize the player when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             new LazyVideoPlayer('videoContainer');
         });
