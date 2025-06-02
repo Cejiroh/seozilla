@@ -1905,6 +1905,9 @@ const renderCanvas = () => {
     const startX = Math.random() * (canvasSize.width - width); // Random X within bounds
     const startY = -height - (Math.random() * 200); // Random Y above the canvas
 
+    // Hide images initially
+    elemRef.style.opacity = '0';
+
     return {
       body: Bodies.rectangle(startX, startY, width, height, {
         render: {
@@ -1922,6 +1925,7 @@ const renderCanvas = () => {
         this.elem.style.top = `${y - this.height / 2}px`;
         this.elem.style.left = `${x - this.width / 2}px`;
         this.elem.style.transform = `rotate(${this.body.angle}rad)`;
+        this.elem.style.opacity = '1'; // Make images visible once they start falling
       }
     };
   });
