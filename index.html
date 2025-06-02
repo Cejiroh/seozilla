@@ -1805,6 +1805,7 @@ const imageData = [
 
 const createImages = () => {
   const container = document.getElementById('letswork');
+  const rect = container.getBoundingClientRect();
   
   // Clear existing images to prevent duplicates
   container.innerHTML = '';
@@ -1817,16 +1818,24 @@ const createImages = () => {
     img.draggable = false;
     img.dataset.index = index;
     
-    // Hide images initially to prevent flash
-    img.style.opacity = '0';
+    // Set position and styling immediately
     img.style.position = 'absolute';
+    img.style.opacity = '0';
     img.style.pointerEvents = 'none';
+    img.style.visibility = 'hidden'; // Extra insurance
+    
+    // Position images off-screen from the start
+    const startX = Math.random() * (rect.width - 100); // Rough estimation
+    const startY = -150 - (index * 50) - (Math.random() * 100);
+    img.style.left = `${startX}px`;
+    img.style.top = `${startY}px`;
     
     container.appendChild(img);
   });
   
-  // Set initial sizes
+  // Set initial sizes and update positions
   updateImageSizes();
+  updateInitialPositions();
 };
 
 function updateImageSizes() {
@@ -1840,6 +1849,22 @@ function updateImageSizes() {
     
     img.style.width = `${originalData.width * scaleFactor}px`;
     img.style.height = `${originalData.height * scaleFactor}px`;
+  });
+}
+
+function updateInitialPositions() {
+  const container = document.getElementById('letswork');
+  const rect = container.getBoundingClientRect();
+  const images = document.querySelectorAll('#letswork .image-item');
+  
+  images.forEach((img, index) => {
+    const width = parseInt(img.style.width);
+    const startX = Math.random() * Math.max(0, rect.width - width);
+    const startY = -150 - (index * 50) - (Math.random() * 100);
+    
+    img.style.left = `${startX}px`;
+    img.style.top = `${startY}px`;
+    img.style.transform = 'rotate(0deg)';
   });
 }
 
@@ -1953,6 +1978,7 @@ const renderCanvas = () => {
         // Show image only when it's in a reasonable position
         if (y > -50) {
           this.elem.style.opacity = '1';
+          this.elem.style.visibility = 'visible';
           this.elem.style.pointerEvents = 'auto';
         }
       }
@@ -2015,6 +2041,8 @@ const renderCanvas = () => {
         Matter.Body.setVelocity(element.body, { x: 0, y: 0 });
         Matter.Body.setAngularVelocity(element.body, 0);
         element.elem.style.opacity = '0';
+        element.elem.style.visibility = 'hidden';
+        element.elem.style.visibility = 'hidden';
       }
       
       // Reset if image goes too far left or right
