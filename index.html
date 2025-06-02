@@ -1788,7 +1788,7 @@ window.addEventListener('resize', () => {
   
   <script src='https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js'></script>
   <script>
-let physicsStarted = false;
+ let physicsStarted = false;
 let isMobile = false;
 let touchStartY = 0;
 let isScrolling = false;
@@ -1828,7 +1828,9 @@ const createImages = () => {
     img.draggable = false;
     img.dataset.index = index;
     
-    // Consistent touch handling for all devices
+    // Hide images initially until physics starts
+    img.style.opacity = '0';
+    img.style.position = 'absolute';
     img.style.touchAction = 'none';
     img.style.pointerEvents = 'auto';
     img.style.userSelect = 'none';
@@ -1937,6 +1939,10 @@ const renderCanvas = () => {
     
     const startX = Math.random() * (canvasSize.width - width);
     const startY = -50 - (Math.random() * 200);
+
+    // Show images when physics starts
+    elemRef.style.opacity = '1';
+    elemRef.style.transition = 'opacity 0.3s ease';
 
     return {
       body: Bodies.rectangle(startX, startY, width, height, {
@@ -2127,8 +2133,16 @@ const addImageInteractions = () => {
       // Handle click/tap if not dragging
       const maxDuration = isMobile ? 300 : 200;
       if (!isDragging && clickDuration < maxDuration) {
-		openPopup();
-        e.preventDefault();
+        // Call openPopup function
+        if (typeof openPopup === 'function') {
+          openPopup();
+        } else {
+          console.log('Image clicked/tapped!');
+        }
+        
+        // Prevent any default behavior and event bubbling
+        if (e.preventDefault) e.preventDefault();
+        return false;
       }
       
       // Reset interaction state
@@ -2137,21 +2151,21 @@ const addImageInteractions = () => {
       isImageInteraction = false;
     };
 
-    // Add event listeners based on device
-    if (isMobile) {
-      img.addEventListener('touchstart', handlePointerStart, { passive: false });
-      img.addEventListener('touchmove', handlePointerMove, { passive: false });
-      img.addEventListener('touchend', handlePointerEnd, { passive: false });
-      
-      // Prevent context menu on long press
-      img.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-      });
-    } else {
-      img.addEventListener('mousedown', handlePointerStart);
-      img.addEventListener('mousemove', handlePointerMove);
-      img.addEventListener('mouseup', handlePointerEnd);
-    }
+    // Add event listeners for both touch and mouse (universal support)
+    // Touch events for mobile
+    img.addEventListener('touchstart', handlePointerStart, { passive: false });
+    img.addEventListener('touchmove', handlePointerMove, { passive: false });
+    img.addEventListener('touchend', handlePointerEnd, { passive: false });
+    
+    // Mouse events for desktop
+    img.addEventListener('mousedown', handlePointerStart);
+    img.addEventListener('mousemove', handlePointerMove);
+    img.addEventListener('mouseup', handlePointerEnd);
+    
+    // Prevent context menu on long press
+    img.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
   });
 };
 
@@ -2175,41 +2189,15 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, observerOptions);
 
-// Handle window resize with debouncing to prevent glitchy reloads
+// Handle window resize - only update sizes, no reloading
 let resizeTimeout;
 const handleResize = () => {
+  if (!physicsStarted) return;
+  
   clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(() => {
-    if (physicsStarted) {
-      const newIsMobile = detectMobile();
-      
-      // Only reload if mobile state actually changed
-      if (newIsMobile !== isMobile) {
-        location.reload();
-      } else {
-        // Just update sizes for minor viewport changes
-        updateImageSizes();
-        
-        // Update canvas size if physics is running
-        if (render && engine) {
-          const letsworkElement = document.getElementById('letswork');
-          const rect = letsworkElement.getBoundingClientRect();
-          
-          // Only update if size changed significantly
-          const widthDiff = Math.abs(rect.width - canvasSize.width);
-          const heightDiff = Math.abs(rect.height - canvasSize.height);
-          
-          if (widthDiff > 50 || heightDiff > 50) {
-            cleanupPhysics();
-            setTimeout(() => {
-              renderCanvas();
-              addImageInteractions();
-            }, 100);
-          }
-        }
-      }
-    }
-  }, 250); // Debounce resize events
+    updateImageSizes();
+  }, 100);
 };
 
 window.addEventListener("DOMContentLoaded", () => {
