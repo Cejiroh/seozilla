@@ -1881,7 +1881,13 @@ const cleanupPhysics = () => {
     Matter.Engine.clear(physicsEngine);
     physicsEngine = null;
   }
-  physicsStarted = false;
+  
+  // Clear images but don't reset physicsStarted here
+  const container = document.getElementById('letswork');
+  if (container) {
+    const images = container.querySelectorAll('.image-item');
+    images.forEach(img => img.remove());
+  }
 };
 
 const renderCanvas = () => {
@@ -2001,14 +2007,49 @@ const renderCanvas = () => {
   mouse.element.removeEventListener("mousewheel", mouse.mousewheel);
   mouse.element.removeEventListener("DOMMouseScroll", mouse.mousewheel);
 
-  // Prevent touch events on canvas from interfering with page scroll
+  // Better mobile scroll handling - only prevent default when actually dragging physics objects
   if (render.canvas) {
-    render.canvas.style.touchAction = 'none';
+    render.canvas.style.touchAction = 'auto'; // Allow scrolling by default
+    render.canvas.style.pointerEvents = 'auto';
     
-    // Only prevent default on canvas, not document
+    let isPhysicsInteracting = false;
+    
+    // Track when physics interaction starts
+    render.canvas.addEventListener('touchstart', (e) => {
+      // Only prevent scrolling if touching near a physics object
+      const touch = e.touches[0];
+      const rect = render.canvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      
+      // Check if touch is near any visible image
+      const images = document.querySelectorAll('.image-item');
+      isPhysicsInteracting = false;
+      
+      images.forEach(img => {
+        const imgRect = img.getBoundingClientRect();
+        const canvasRect = render.canvas.getBoundingClientRect();
+        const imgX = imgRect.left - canvasRect.left;
+        const imgY = imgRect.top - canvasRect.top;
+        
+        if (x >= imgX - 20 && x <= imgX + imgRect.width + 20 && 
+            y >= imgY - 20 && y <= imgY + imgRect.height + 20 && 
+            img.style.opacity !== '0') {
+          isPhysicsInteracting = true;
+        }
+      });
+    }, { passive: true });
+    
+    // Only prevent scroll when actively dragging physics objects
     render.canvas.addEventListener('touchmove', (e) => {
-      e.preventDefault();
+      if (isPhysicsInteracting) {
+        e.preventDefault();
+      }
     }, { passive: false });
+    
+    render.canvas.addEventListener('touchend', () => {
+      isPhysicsInteracting = false;
+    }, { passive: true });
   }
 
   // Add all bodies to world
@@ -2165,14 +2206,47 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Handle window resize with proper cleanup
+// Handle window resize with debouncing to prevent refresh loops
+let resizeTimeout;
+let lastWidth = window.innerWidth;
+let lastHeight = window.innerHeight;
+
 window.addEventListener('resize', () => {
-  if (physicsStarted) {
-    cleanupPhysics();
-    setTimeout(() => {
-      location.reload();
-    }, 100);
-  }
+  clearTimeout(resizeTimeout);
+  
+  resizeTimeout = setTimeout(() => {
+    const currentWidth = window.innerWidth;
+    const currentHeight = window.innerHeight;
+    
+    // Only reload if there's a significant size change (not just mobile keyboard/orientation)
+    const widthChange = Math.abs(currentWidth - lastWidth);
+    const heightChange = Math.abs(currentHeight - lastHeight);
+    
+    if (physicsStarted && (widthChange > 100 || heightChange > 100)) {
+      lastWidth = currentWidth;
+      lastHeight = currentHeight;
+      cleanupPhysics();
+      
+      setTimeout(() => {
+        // Restart physics instead of reloading page
+        const letsworkElement = document.getElementById('letswork');
+        if (letsworkElement) {
+          physicsStarted = true;
+          createImages();
+          setTimeout(() => {
+            renderCanvas();
+            addImageInteractions();
+          }, 200);
+        }
+      }, 100);
+    } else {
+      lastWidth = currentWidth;
+      lastHeight = currentHeight;
+      if (!physicsStarted) {
+        updateImageSizes();
+      }
+    }
+  }, 250); // Debounce resize events
 });
   </script>
 							</div>
