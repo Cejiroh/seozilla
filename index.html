@@ -1901,9 +1901,9 @@ const renderCanvas = () => {
     const width = parseInt(elemRef.style.width);
     const height = parseInt(elemRef.style.height);
 
-    // Start from completely random positions across the width
+    // Start from completely random positions across the width and above the canvas
     const startX = Math.random() * (canvasSize.width - width); // Random X within bounds
-    const startY = -50 - (Math.random() * 200); // Random Y stagger
+    const startY = -height - (Math.random() * 200); // Random Y above the canvas
 
     return {
       body: Bodies.rectangle(startX, startY, width, height, {
@@ -1942,11 +1942,6 @@ const renderCanvas = () => {
   mouse.element.removeEventListener("mousewheel", mouse.mousewheel);
   mouse.element.removeEventListener("DOMMouseScroll", mouse.mousewheel);
 
-  // Add touch event listeners to prevent default scrolling behavior
-  letsworkElement.addEventListener('touchmove', function(e) {
-    e.preventDefault();
-  }, { passive: false });
-
   // Add all bodies to world
   World.add(engine.world, [
     floor,
@@ -1967,10 +1962,10 @@ const renderCanvas = () => {
 
       // Reset position if image falls below screen
       if (element.body.position.y > canvasSize.height + 100) {
-        const newX = canvasSize.width / 2 + (Math.random() - 0.5) * 200;
+        const newX = Math.random() * (canvasSize.width - element.width);
         Matter.Body.setPosition(element.body, {
           x: newX,
-          y: -50
+          y: -element.height
         });
         Matter.Body.setVelocity(element.body, { x: 0, y: 0 });
         Matter.Body.setAngularVelocity(element.body, 0);
@@ -1978,10 +1973,10 @@ const renderCanvas = () => {
 
       // Reset if image goes too far left or right
       if (element.body.position.x < -50 || element.body.position.x > canvasSize.width + 50) {
-        const newX = canvasSize.width / 2 + (Math.random() - 0.5) * 200;
+        const newX = Math.random() * (canvasSize.width - element.width);
         Matter.Body.setPosition(element.body, {
           x: newX,
-          y: -50
+          y: -element.height
         });
         Matter.Body.setVelocity(element.body, { x: 0, y: 0 });
         Matter.Body.setAngularVelocity(element.body, 0);
@@ -2030,6 +2025,37 @@ const addImageInteractions = () => {
 
     // Handle click vs drag
     img.addEventListener('mouseup', (e) => {
+      const clickDuration = Date.now() - dragStartTime;
+
+      // If it's a quick click (< 200ms) and minimal movement, treat as click
+      if (!isDragging && clickDuration < 200) {
+        openPopup();
+        e.preventDefault();
+      }
+
+      // Reset drag tracking
+      isDragging = false;
+      dragStartTime = 0;
+    });
+
+    // Touch event listeners for mobile devices
+    img.addEventListener('touchstart', (e) => {
+      isDragging = false;
+      dragStartTime = Date.now();
+      dragStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    });
+
+    img.addEventListener('touchmove', (e) => {
+      const distance = Math.sqrt(
+        Math.pow(e.touches[0].clientX - dragStartPos.x, 2) +
+        Math.pow(e.touches[0].clientY - dragStartPos.y, 2)
+      );
+      if (distance > 5) { // 5px threshold for drag
+        isDragging = true;
+      }
+    });
+
+    img.addEventListener('touchend', (e) => {
       const clickDuration = Date.now() - dragStartTime;
 
       // If it's a quick click (< 200ms) and minimal movement, treat as click
