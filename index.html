@@ -1789,9 +1789,11 @@ window.addEventListener('resize', () => {
   
   <script src='https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js'></script>
   <script>
-  let physicsStarted = false;
+let physicsStarted = false;
+let physicsEngine = null;
+let physicsRender = null;
     
- // Store original dimensions globally
+// Store original dimensions globally
 const imageData = [
   { url: 'images/letswork/1.png', width: 405, height: 111 },
   { url: 'images/letswork/2.png', width: 600, height: 111 },
@@ -1813,7 +1815,13 @@ const createImages = () => {
     img.src = imgData.url;
     img.alt = `Falling image ${index + 1}`;
     img.draggable = false;
-    img.dataset.index = index; // Store index for later reference
+    img.dataset.index = index;
+    
+    // Hide images initially to prevent flash
+    img.style.opacity = '0';
+    img.style.position = 'absolute';
+    img.style.pointerEvents = 'none';
+    
     container.appendChild(img);
   });
   
@@ -1835,249 +1843,309 @@ function updateImageSizes() {
   });
 }
 
-// Initialize when DOM is ready (remove this line if you're calling createImages() elsewhere)
-// document.addEventListener('DOMContentLoaded', createImages);
-window.addEventListener('resize', updateImageSizes);
+// Cleanup function
+const cleanupPhysics = () => {
+  if (physicsRender) {
+    Matter.Render.stop(physicsRender);
+    if (physicsRender.canvas && physicsRender.canvas.parentNode) {
+      physicsRender.canvas.parentNode.removeChild(physicsRender.canvas);
+    }
+    physicsRender = null;
+  }
+  if (physicsEngine) {
+    Matter.Engine.clear(physicsEngine);
+    physicsEngine = null;
+  }
+  physicsStarted = false;
+};
 
-    const renderCanvas = () => {
-      const Engine = Matter.Engine;
-      const Render = Matter.Render;
-      const World = Matter.World;
-      const Bodies = Matter.Bodies;
-      const Runner = Matter.Runner;
-      
-      const params = {
-        isStatic: true,
+const renderCanvas = () => {
+  const Engine = Matter.Engine;
+  const Render = Matter.Render;
+  const World = Matter.World;
+  const Bodies = Matter.Bodies;
+  const Runner = Matter.Runner;
+  
+  const params = {
+    isStatic: true,
+    render: {
+      fillStyle: "transparent"
+    }
+  };
+
+  const letsworkElement = document.getElementById('letswork');
+  const rect = letsworkElement.getBoundingClientRect();
+  
+  const canvasSize = {
+    width: rect.width,
+    height: rect.height
+  };
+
+  const engine = Engine.create({});
+  physicsEngine = engine;
+  engine.world.gravity.y = 0.8;
+
+  const render = Render.create({
+    element: letsworkElement,
+    engine: engine,
+    options: {
+      ...canvasSize,
+      background: "transparent",
+      wireframes: false,
+      showDebug: false,
+      showVelocity: false
+    }
+  });
+  physicsRender = render;
+
+  // Create boundaries
+  const floor = Bodies.rectangle(
+    canvasSize.width / 2,
+    canvasSize.height - 25,
+    canvasSize.width,
+    50,
+    params
+  );
+
+  const wall1 = Bodies.rectangle(
+    25,
+    canvasSize.height / 2,
+    50,
+    canvasSize.height,
+    params
+  );
+
+  const wall2 = Bodies.rectangle(
+    canvasSize.width - 25,
+    canvasSize.height / 2,
+    50,
+    canvasSize.height,
+    params
+  );
+
+  const imageElements = document.querySelectorAll(".image-item");
+  const imageBodies = [...imageElements].map((elemRef, index) => {
+    const width = parseInt(elemRef.style.width);
+    const height = parseInt(elemRef.style.height);
+    
+    // Start from completely random positions across the width, but above viewport
+    const startX = Math.random() * (canvasSize.width - width);
+    const startY = -100 - (index * 50) - (Math.random() * 100); // Stagger more to prevent clumping
+
+    return {
+      body: Bodies.rectangle(startX, startY, width, height, {
         render: {
           fillStyle: "transparent"
+        },
+        restitution: 0.4,
+        friction: 0.3,
+        frictionAir: 0.005
+      }),
+      elem: elemRef,
+      width: width,
+      height: height,
+      render() {
+        const { x, y } = this.body.position;
+        this.elem.style.top = `${y - this.height / 2}px`;
+        this.elem.style.left = `${x - this.width / 2}px`;
+        this.elem.style.transform = `rotate(${this.body.angle}rad)`;
+        
+        // Show image only when it's in a reasonable position
+        if (y > -50) {
+          this.elem.style.opacity = '1';
+          this.elem.style.pointerEvents = 'auto';
         }
-      };
+      }
+    };
+  });
 
-      const letsworkElement = document.getElementById('letswork');
-      const rect = letsworkElement.getBoundingClientRect();
+  // Mouse interaction with better mobile handling
+  const mouse = Matter.Mouse.create(letsworkElement);
+  const mouseConstraint = Matter.MouseConstraint.create(engine, {
+    mouse,
+    constraint: {
+      stiffness: 0.3,
+      render: {
+        visible: false
+      }
+    }
+  });
+
+  // Disable mouse wheel zoom
+  mouse.element.removeEventListener("mousewheel", mouse.mousewheel);
+  mouse.element.removeEventListener("DOMMouseScroll", mouse.mousewheel);
+
+  // Prevent touch events on canvas from interfering with page scroll
+  if (render.canvas) {
+    render.canvas.style.touchAction = 'none';
+    
+    // Only prevent default on canvas, not document
+    render.canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+  }
+
+  // Add all bodies to world
+  World.add(engine.world, [
+    floor,
+    wall1,
+    wall2,
+    ...imageBodies.map(item => item.body),
+    mouseConstraint
+  ]);
+
+  render.mouse = mouse;
+  Runner.run(engine);
+  Render.run(render);
+
+  // Animation loop
+  (function rerender() {
+    if (!physicsEngine) return; // Stop if physics was cleaned up
+    
+    imageBodies.forEach(element => {
+      element.render();
       
-      const canvasSize = {
-        width: rect.width,
-        height: rect.height
-      };
-
-      const engine = Engine.create({});
-      engine.world.gravity.y = 0.8;
-
-      const render = Render.create({
-        element: letsworkElement,
-        engine: engine,
-        options: {
-          ...canvasSize,
-          background: "transparent",
-          wireframes: false,
-          showDebug: false,
-          showVelocity: false
-        }
-      });
-
-      // Create boundaries
-      const floor = Bodies.rectangle(
-        canvasSize.width / 2,
-        canvasSize.height - 25,
-        canvasSize.width,
-        50,
-        params
-      );
-
-      const wall1 = Bodies.rectangle(
-        25,
-        canvasSize.height / 2,
-        50,
-        canvasSize.height,
-        params
-      );
-
-      const wall2 = Bodies.rectangle(
-        canvasSize.width - 25,
-        canvasSize.height / 2,
-        50,
-        canvasSize.height,
-        params
-      );
-
-      const imageElements = document.querySelectorAll(".image-item");
-      const imageBodies = [...imageElements].map((elemRef, index) => {
-        const width = parseInt(elemRef.style.width);
-        const height = parseInt(elemRef.style.height);
-        
-    // Start from completely random positions across the width
-        const startX = Math.random() * (canvasSize.width - width); // Random X within bounds
-        const startY = -50 - (Math.random() * 200); // Random Y stagger
-
-        return {
-          body: Bodies.rectangle(startX, startY, width, height, {
-            render: {
-              fillStyle: "transparent"
-            },
-            restitution: 0.4,
-            friction: 0.3,
-            frictionAir: 0.005
-          }),
-          elem: elemRef,
-          width: width,
-          height: height,
-          render() {
-            const { x, y } = this.body.position;
-            this.elem.style.top = `${y - this.height / 2}px`;
-            this.elem.style.left = `${x - this.width / 2}px`;
-            this.elem.style.transform = `rotate(${this.body.angle}rad)`;
-          }
-        };
-      });
-
-      // Mouse interaction
-      const mouse = Matter.Mouse.create(letsworkElement);
-      const mouseConstraint = Matter.MouseConstraint.create(engine, {
-        mouse,
-        constraint: {
-          stiffness: 0.3,
-          render: {
-            visible: false
-          }
-        }
-      });
-
-      // Disable mouse wheel zoom
-      mouse.element.removeEventListener("mousewheel", mouse.mousewheel);
-      mouse.element.removeEventListener("DOMMouseScroll", mouse.mousewheel);
-
-      // Add all bodies to world
-      World.add(engine.world, [
-        floor,
-        wall1,
-        wall2,
-        ...imageBodies.map(item => item.body),
-        mouseConstraint
-      ]);
-
-      render.mouse = mouse;
-      Runner.run(engine);
-      Render.run(render);
-
-      // Animation loop
-      (function rerender() {
-        imageBodies.forEach(element => {
-          element.render();
-          
-          // Reset position if image falls below screen
-          if (element.body.position.y > canvasSize.height + 100) {
-            const newX = canvasSize.width / 2 + (Math.random() - 0.5) * 200;
-            Matter.Body.setPosition(element.body, {
-              x: newX,
-              y: -50
-            });
-            Matter.Body.setVelocity(element.body, { x: 0, y: 0 });
-            Matter.Body.setAngularVelocity(element.body, 0);
-          }
-          
-          // Reset if image goes too far left or right
-          if (element.body.position.x < -50 || element.body.position.x > canvasSize.width + 50) {
-            const newX = canvasSize.width / 2 + (Math.random() - 0.5) * 200;
-            Matter.Body.setPosition(element.body, {
-              x: newX,
-              y: -50
-            });
-            Matter.Body.setVelocity(element.body, { x: 0, y: 0 });
-            Matter.Body.setAngularVelocity(element.body, 0);
-          }
+      // Reset position if image falls below screen
+      if (element.body.position.y > canvasSize.height + 100) {
+        const newX = canvasSize.width / 2 + (Math.random() - 0.5) * 200;
+        Matter.Body.setPosition(element.body, {
+          x: newX,
+          y: -100
         });
-        
-        requestAnimationFrame(rerender);
-      })();
-    };
-
-    // Add some interactivity
-    const addImageInteractions = () => {
-      const images = document.querySelectorAll('.image-item');
-      let isDragging = false;
-      let dragStartTime = 0;
-      let dragStartPos = { x: 0, y: 0 };
+        Matter.Body.setVelocity(element.body, { x: 0, y: 0 });
+        Matter.Body.setAngularVelocity(element.body, 0);
+        element.elem.style.opacity = '0';
+      }
       
-      images.forEach(img => {
-        img.addEventListener('mouseenter', () => {
-          img.style.filter = 'brightness(1.2) saturate(1.3)';
+      // Reset if image goes too far left or right
+      if (element.body.position.x < -50 || element.body.position.x > canvasSize.width + 50) {
+        const newX = canvasSize.width / 2 + (Math.random() - 0.5) * 200;
+        Matter.Body.setPosition(element.body, {
+          x: newX,
+          y: -100
         });
-        
-        img.addEventListener('mouseleave', () => {
-          img.style.filter = 'brightness(1) saturate(1)';
-        });
-
-        // Track mouse down for drag detection
-        img.addEventListener('mousedown', (e) => {
-          isDragging = false;
-          dragStartTime = Date.now();
-          dragStartPos = { x: e.clientX, y: e.clientY };
-        });
-
-        // Track mouse move to detect dragging
-        img.addEventListener('mousemove', (e) => {
-          if (dragStartTime > 0) {
-            const distance = Math.sqrt(
-              Math.pow(e.clientX - dragStartPos.x, 2) + 
-              Math.pow(e.clientY - dragStartPos.y, 2)
-            );
-            if (distance > 5) { // 5px threshold for drag
-              isDragging = true;
-            }
-          }
-        });
-
-        // Handle click vs drag
-        img.addEventListener('mouseup', (e) => {
-          const clickDuration = Date.now() - dragStartTime;
-          
-          // If it's a quick click (< 200ms) and minimal movement, treat as click
-          if (!isDragging && clickDuration < 200) {
-            openPopup();
-            e.preventDefault();
-          }
-          
-          // Reset drag tracking
-          isDragging = false;
-          dragStartTime = 0;
-        });
-      });
-    };
-
-    // Intersection Observer to detect when .letswork comes into view
-    const observerOptions = {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.3 // Trigger when 30% of the element is visible
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting && !physicsStarted) {
-          physicsStarted = true;
-          // Start the physics simulation
-          createImages();
-          setTimeout(() => {
-            renderCanvas();
-            addImageInteractions();
-          }, 100);
-          
-        }
-      });
-    }, observerOptions);
-
-    window.addEventListener("DOMContentLoaded", () => {
-      const letsworkElement = document.getElementById('letswork');
-      observer.observe(letsworkElement);
-    });
-
-    // Handle window resize
-    window.addEventListener('resize', () => {
-      if (physicsStarted) {
-        location.reload();
+        Matter.Body.setVelocity(element.body, { x: 0, y: 0 });
+        Matter.Body.setAngularVelocity(element.body, 0);
+        element.elem.style.opacity = '0';
       }
     });
+    
+    requestAnimationFrame(rerender);
+  })();
+};
+
+// Add some interactivity with better mobile support
+const addImageInteractions = () => {
+  const images = document.querySelectorAll('.image-item');
+  let isDragging = false;
+  let dragStartTime = 0;
+  let dragStartPos = { x: 0, y: 0 };
+  
+  images.forEach(img => {
+    // Desktop hover effects
+    img.addEventListener('mouseenter', () => {
+      if (!('ontouchstart' in window)) { // Only on non-touch devices
+        img.style.filter = 'brightness(1.2) saturate(1.3)';
+      }
+    });
+    
+    img.addEventListener('mouseleave', () => {
+      if (!('ontouchstart' in window)) {
+        img.style.filter = 'brightness(1) saturate(1)';
+      }
+    });
+
+    // Universal pointer events for better mobile support
+    const startInteraction = (e) => {
+      isDragging = false;
+      dragStartTime = Date.now();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      dragStartPos = { x: clientX, y: clientY };
+    };
+
+    const moveInteraction = (e) => {
+      if (dragStartTime > 0) {
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const distance = Math.sqrt(
+          Math.pow(clientX - dragStartPos.x, 2) + 
+          Math.pow(clientY - dragStartPos.y, 2)
+        );
+        if (distance > 10) { // Increased threshold for mobile
+          isDragging = true;
+        }
+      }
+    };
+
+    const endInteraction = (e) => {
+      const clickDuration = Date.now() - dragStartTime;
+      
+      // If it's a quick tap/click and minimal movement, treat as click
+      if (!isDragging && clickDuration < 300) { // Increased time for mobile
+        openPopup();
+        e.preventDefault();
+      }
+      
+      // Reset drag tracking
+      isDragging = false;
+      dragStartTime = 0;
+    };
+
+    // Mouse events
+    img.addEventListener('mousedown', startInteraction);
+    img.addEventListener('mousemove', moveInteraction);
+    img.addEventListener('mouseup', endInteraction);
+
+    // Touch events for mobile
+    img.addEventListener('touchstart', startInteraction, { passive: false });
+    img.addEventListener('touchmove', moveInteraction, { passive: false });
+    img.addEventListener('touchend', endInteraction, { passive: false });
+  });
+};
+
+// Initialize when DOM is ready
+window.addEventListener('resize', updateImageSizes);
+
+// Intersection Observer to detect when .letswork comes into view
+const observerOptions = {
+  root: null,
+  rootMargin: '0px',
+  threshold: 0.3
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting && !physicsStarted) {
+      physicsStarted = true;
+      // Start the physics simulation
+      createImages();
+      
+      // Use a longer delay to ensure smooth initialization
+      setTimeout(() => {
+        renderCanvas();
+        addImageInteractions();
+      }, 200);
+    }
+  });
+}, observerOptions);
+
+window.addEventListener("DOMContentLoaded", () => {
+  const letsworkElement = document.getElementById('letswork');
+  if (letsworkElement) {
+    observer.observe(letsworkElement);
+  }
+});
+
+// Handle window resize with proper cleanup
+window.addEventListener('resize', () => {
+  if (physicsStarted) {
+    cleanupPhysics();
+    setTimeout(() => {
+      location.reload();
+    }, 100);
+  }
+});
   </script>
 							</div>
 						
