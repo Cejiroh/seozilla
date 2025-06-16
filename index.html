@@ -31,7 +31,7 @@
 	.heroimages{
 		position: absolute;
 		top: -20em;
-		left: -15em;
+		left: -10em;
 		text-align: center;
 		transform: rotate(45deg);
 		width: 300vh;
@@ -1175,27 +1175,6 @@ scrollTrigger: {
 	end: "bottom top",
 	scrub: true,
 	pin: false} });
-
-gsap.to(".hero", {
-  duration: 3,
-  scale: 1.15,
-
-  scrollTrigger: {
-    trigger: ".hero",
-	//start: "start scroller"
-	start: "top center",
-	end: "center center",
-    snap: {
-      snapTo: (progress) => (progress > 0.5 ? 1 : progress),
-      duration: 0.5,
-      ease: "power2.inOut"
-    },
-    scrub: true,
-	pin: false,
-    markers: false},
-	  onComplete: () => {
-		startCycle();
-	  } });
 
 gsap.to(".webdev", {
 	duration: 3,
